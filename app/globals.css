@@ -1,26 +1,301 @@
 @import "tailwindcss";
 
+/* ============================================================
+   ROB DOES IT — DESIGN TOKENS
+   70% black · 15% ivory · 10% media · 5% gold
+   ============================================================ */
+
+@theme {
+  /* Canvas */
+  --color-obsidian: #050505;
+  --color-ink: #0a0a0a;
+  --color-ink-2: #101010;
+  --color-ink-3: #161616;
+  --color-hairline: rgba(245, 241, 232, 0.08);
+  --color-hairline-strong: rgba(245, 241, 232, 0.16);
+
+  /* Signal */
+  --color-gold: #d4af37;
+  --color-gold-hi: #f3d675;
+  --color-gold-dk: #9e741b;
+  --color-gold-dim: rgba(212, 175, 55, 0.18);
+
+  /* Type */
+  --color-ivory: #f5f1e8;
+  --color-steel: #8d8d8d;
+  --color-steel-dk: #5a5a5a;
+
+  --font-display: var(--font-bebas), "Bebas Neue", "Anton", Impact, sans-serif;
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-space-mono), ui-monospace, monospace;
+
+  --ease-cine: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-swift: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --gold-foil: linear-gradient(
+    120deg,
+    #8e6517 0%,
+    #f4d879 35%,
+    #c89a2b 65%,
+    #f8df8c 100%
+  );
+  --nav-h: 84px;
+  color-scheme: dark;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  -webkit-tap-highlight-color: transparent;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--color-obsidian);
+  scroll-behavior: auto;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-obsidian);
+  color: var(--color-ivory);
+  font-family: var(--font-sans);
+  font-feature-settings: "kern", "liga";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--color-gold);
+  color: #050505;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Lenis */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* ============================================================
+   TYPOGRAPHY PRIMITIVES
+   ============================================================ */
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  line-height: 0.82;
+  letter-spacing: 0.005em;
+}
+
+.t-hero {
+  font-size: clamp(3.75rem, 12.5vw, 12rem);
+}
+.t-section {
+  font-size: clamp(2.25rem, 6.8vw, 8rem);
+}
+.t-sub {
+  font-size: clamp(1.5rem, 3.6vw, 3.5rem);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.foil {
+  background: var(--gold-foil);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.outline-type {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(245, 241, 232, 0.34);
+}
+@supports not (-webkit-text-stroke: 1px black) {
+  .outline-type {
+    color: rgba(245, 241, 232, 0.34);
+  }
+}
+
+/* ============================================================
+   TEXTURE — film grain + vignette (global, non-interactive)
+   ============================================================ */
+
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.038;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  z-index: 2;
+}
+
+.vignette::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    120% 90% at 50% 45%,
+    transparent 40%,
+    rgba(5, 5, 5, 0.55) 100%
+  );
+  z-index: 1;
+}
+
+/* Site-wide film grain. Fixed, never interactive, sits under the
+   navigation and any overlay so UI stays crisp. */
+.grain-global {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
+
+/* The custom cursor replaces the pointer only where it is actually shown
+   (fine pointer, motion allowed). Text fields keep their caret. */
+html.has-cursor,
+html.has-cursor * {
+  cursor: none;
+}
+html.has-cursor input,
+html.has-cursor textarea,
+html.has-cursor select {
+  cursor: text;
+}
+/* native video controls need a real pointer */
+html.has-cursor video {
+  cursor: default;
+}
+
+/* ============================================================
+   MARQUEE (CSS-driven, reduced-motion aware)
+   ============================================================ */
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  animation: marquee var(--marquee-dur, 40s) linear infinite;
+}
+.marquee-track[data-dir="right"] {
+  animation-direction: reverse;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: var(--marquee-hover, running);
+}
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* ============================================================
+   HAIRLINES / RULES
+   ============================================================ */
+
+.rule-gold {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(212, 175, 55, 0.55) 20%,
+    rgba(212, 175, 55, 0.55) 80%,
+    transparent
+  );
+}
+
+.edge-metal {
+  position: relative;
+}
+.edge-metal::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: var(--gold-foil);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.35s var(--ease-cine);
+  pointer-events: none;
+}
+.group:hover .edge-metal::after,
+.edge-metal:hover::after {
+  opacity: 1;
+}
+
+/* Hide scrollbars on drag rails while keeping keyboard scroll */
+.no-bar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-bar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .marquee-track {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+/* Screen-reader only */
+.sr-only-focusable:not(:focus):not(:focus-within) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
