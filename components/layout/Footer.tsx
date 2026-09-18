@@ -3,6 +3,45 @@ import { site, nav, bookCta } from "@/data/site";
 import { liveSocials } from "@/data/socials";
 import { Mic, LogoStack } from "./Logo";
 
+/**
+ * Build credit. Set in Manrope rather than the site's metadata mono so it
+ * reads as a signature instead of competing with Rob's own footer labels.
+ */
+function Credit() {
+  const { name, url } = site.developer;
+  const label = (
+    <>
+      <span className="text-steel-dk">Developed by </span>
+      <span className="font-medium text-ivory/80 transition-colors duration-300 group-hover/credit:text-gold">
+        {name}
+      </span>
+    </>
+  );
+
+  return (
+    <p className="font-sans text-[0.8125rem] leading-none tracking-[-0.005em]">
+      {url ? (
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group/credit inline-flex items-center gap-1.5"
+        >
+          {label}
+          <span
+            aria-hidden
+            className="translate-x-0 text-gold opacity-0 transition-all duration-300 group-hover/credit:translate-x-0.5 group-hover/credit:opacity-100"
+          >
+            ↗
+          </span>
+        </a>
+      ) : (
+        <span className="group/credit">{label}</span>
+      )}
+    </p>
+  );
+}
+
 export function Footer() {
   const year = new Date().getFullYear();
 
@@ -90,9 +129,10 @@ export function Footer() {
 
         <div className="rule-gold mt-16 opacity-40" />
 
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="mono text-steel-dk">{site.location}</p>
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 sm:order-last">
             {site.legalLinks.map((l) => (
               <Link key={l.href} href={l.href} className="mono text-steel-dk transition-colors hover:text-gold">
                 {l.label}
@@ -102,6 +142,8 @@ export function Footer() {
               © {year} {site.legal.entity}
             </p>
           </div>
+
+          <Credit />
         </div>
       </div>
     </footer>

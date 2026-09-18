@@ -41,6 +41,13 @@ export const site = {
   /* Legal pages render in the footer only once they exist.
      Add e.g. { label: "PRIVACY", href: "/privacy" } when written. */
   legalLinks: [] as { label: string; href: string }[],
+
+  /* Build credit in the footer. Give it a `url` and the name becomes a
+     link; left null it stays plain text (no invented destinations). */
+  developer: {
+    name: "Bytes and Partners",
+    url: "https://www.bytesandpartners.co/" as string | null,
+  },
 } as const;
 
 export type NavItem = {
