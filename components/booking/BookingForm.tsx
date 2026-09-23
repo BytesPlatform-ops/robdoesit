@@ -58,25 +58,14 @@ export function BookingForm() {
       return;
     }
 
-    const accessKey = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
-    if (!accessKey) {
-      console.error(
-        "[ROB DOES IT] NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY is not set — booking was NOT sent. " +
-          "Add it to the environment and restart/redeploy.",
-      );
-      setState("error");
-      return;
-    }
-
     try {
-      const res = await fetch("https://api.web3forms.com/submit", {
+      const res = await fetch("https://formsubmit.co/ajax/robert.gilbert.lc92@gmail.com", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
-          access_key: accessKey,
-          subject: `New Booking Enquiry — ${data.eventName}`,
-          from_name: "Rob Does It Website",
-          replyto: data.email,
+          _subject: `New Booking Enquiry - ${data.eventName}`,
+          _template: "table",
+          _replyto: data.email,
           "Event Name": data.eventName,
           "Event Type": data.eventType,
           "Event Date": data.eventDate,
@@ -92,12 +81,13 @@ export function BookingForm() {
         }),
       });
       const result = await res.json().catch(() => ({}));
-      if (!res.ok || !result.success) {
+      // FormSubmit reports success as the string "true"
+      if (!res.ok || String(result.success) !== "true") {
         throw new Error(result.message || `Submission failed (${res.status})`);
       }
       setState("done");
     } catch (error) {
-      console.error("[ROB DOES IT] Web3Forms submission failed:", error);
+      console.error("[ROB DOES IT] FormSubmit submission failed:", error);
       setState("error");
     }
   };
