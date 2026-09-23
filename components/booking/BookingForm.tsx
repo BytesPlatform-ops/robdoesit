@@ -51,15 +51,53 @@ export function BookingForm() {
 
   const onSubmit = async (data: BookingInput) => {
     setState("sending");
-    try {
-      const res = await fetch("/api/booking", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error("failed");
+
+    // honeypot: a bot filled the hidden field — look successful, deliver nothing
+    if (data.website) {
       setState("done");
-    } catch {
+      return;
+    }
+
+    const accessKey = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
+    if (!accessKey) {
+      console.error(
+        "[ROB DOES IT] NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY is not set — booking was NOT sent. " +
+          "Add it to the environment and restart/redeploy.",
+      );
+      setState("error");
+      return;
+    }
+
+    try {
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          access_key: accessKey,
+          subject: `New Booking Enquiry — ${data.eventName}`,
+          from_name: "Rob Does It Website",
+          replyto: data.email,
+          "Event Name": data.eventName,
+          "Event Type": data.eventType,
+          "Event Date": data.eventDate,
+          City: data.city,
+          Venue: data.venue,
+          "Needs / Services": data.needs.join(", "),
+          Name: data.name,
+          Company: data.company || "—",
+          Email: data.email,
+          Phone: data.phone || "—",
+          "Instagram / Website": data.handle || "—",
+          Message: data.message || "—",
+        }),
+      });
+      const result = await res.json().catch(() => ({}));
+      if (!res.ok || !result.success) {
+        throw new Error(result.message || `Submission failed (${res.status})`);
+      }
+      setState("done");
+    } catch (error) {
+      console.error("[ROB DOES IT] Web3Forms submission failed:", error);
       setState("error");
     }
   };
@@ -176,7 +214,7 @@ export function BookingForm() {
                   <input
                     id="eventDate"
                     type="date"
-                    className={`${inputClass} [color-scheme:dark]`}
+                    className={`${inputClass} min-w-0 [color-scheme:dark]`}
                     aria-invalid={!!errors.eventDate}
                     {...register("eventDate")}
                   />
